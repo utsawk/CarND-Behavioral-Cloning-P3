@@ -16,6 +16,7 @@ from keras.layers.normalization import BatchNormalization
 
 
 # image processing
+# image processing
 def brightness_augment_image(image):
     image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
     image1 = np.array(image1, dtype = np.float64)
@@ -24,14 +25,14 @@ def brightness_augment_image(image):
     image1[:,:,2][image1[:,:,2]>255]  = 255
     image1 = np.array(image1, dtype = np.uint8)
     image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
-    return image
+    return image1
 
 def translate_image(image, angle, translate_range_hor, translate_range_ver):
-    dx = translate_range_hor*np.random.uniform()-translate_range_hor/2
-    dy = translate_range_ver*np.random.uniform()-translate_range_ver/2
+    dx = np.random.randint(-translate_range_hor//2, translate_range_hor//2)
+    dy = np.random.randint(-translate_range_ver//2, translate_range_ver//2)
     transform_matrix = np.float32([[1,0,dx],[0,1,dy]])
     image = cv2.warpAffine(image,transform_matrix,(image.shape[1], image.shape[0]))
-    angle = angle + dx * 0.002
+    angle = angle + dx * 0.0025
     return image,angle
 
 def perturb_image_helper(image, angle):
@@ -62,26 +63,20 @@ def generator(samples, batch_size, training):
             images = []
             measurements = []
             for sample in batch_samples:
-                for i in range(3):
-                    source_path = sample[i]
-                    filename = source_path.split('/')[-1]
-                    current_path = 'data/IMG/' + filename
-                    image = mpimg.imread(current_path)
-                    measurement = float(line[3]) + correction[i]
-                    # copy for processing later
-                    image_copy = np.copy(image)
-                    measurement_copy = measurement
-                    if training:
-                        image, measurement = perturb_image_helper(image, measurement)
-                    images.append(image)
-                    measurements.append(measurement)
-                    # add flipped image and the measurement for data augmentation
+                index = np.random.randint(0, 3)
+                source_path = sample[index]
+                filename = source_path.split('/')[-1]
+                current_path = 'data/IMG/' + filename
+                image = mpimg.imread(current_path)
+                measurement = float(line[3]) + correction[index]
+                # add flipped image and the measurement for data augmentation
+                if np.random.randint(0, 2):
                     image = np.fliplr(image_copy)
                     measurement = -measurement_copy
-                    if training:
-                        image, measurement = perturb_image_helper(image, measurement)
-                    images.append(image)
-                    measurements.append(measurement)
+                if training:
+                    image, measurement = perturb_image_helper(image, measurement)
+                images.append(image)
+                measurements.append(measurement)
                    
             X = np.array(images)
             y = np.array(measurements)
@@ -91,7 +86,7 @@ def generator(samples, batch_size, training):
 dropout_prob_cl = 0.25
 dropout_prob_fc = 0.5
 # batch size
-batch_size = 16
+batch_size = 128
 
 # compile and train the model using the generator function
 train_generator = generator(train_samples, batch_size, True)
@@ -130,7 +125,7 @@ prediction = Dense(1)(fc1)
 model = Model(inputs = inputs, outputs = prediction)
 
 model.compile(loss = 'mse', optimizer = 'adam')
-model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
-    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=20)
-model.save('model_track2.h5')
+model.fit_generator(train_generator, steps_per_epoch= 6*len(train_samples)//batch_size, \
+    validation_data=validation_generator, validation_steps=6*len(validation_samples)//batch_size, nb_epoch=10)
+model.save('model.h5')
 model.summary()
