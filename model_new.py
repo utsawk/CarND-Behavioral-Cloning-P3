@@ -31,7 +31,7 @@ def translate_image(image, angle, translate_range_hor, translate_range_ver):
     dy = translate_range_ver*np.random.uniform()-translate_range_ver/2
     transform_matrix = np.float32([[1,0,dx],[0,1,dy]])
     image = cv2.warpAffine(image,transform_matrix,(image.shape[1], image.shape[0]))
-    angle = angle + dx * 0.004
+    angle = angle + dx * 0.002
     return image,angle
 
 def perturb_image_helper(image, angle):
@@ -50,7 +50,7 @@ correction = [0, 0.25, -0.25]
 translate_range_hor = 100
 translate_range_ver = 20
 
-train_samples, validation_samples = train_test_split(lines, test_size=0.2)
+train_samples, validation_samples = train_test_split(lines[1:], test_size=0.2)
 
 # add flipped image and the measurement for data augmentation with 1/2 probability
 def generator(samples, batch_size, training):
@@ -91,7 +91,7 @@ def generator(samples, batch_size, training):
 dropout_prob_cl = 0.25
 dropout_prob_fc = 0.5
 # batch size
-batch_size = 128
+batch_size = 16
 
 # compile and train the model using the generator function
 train_generator = generator(train_samples, batch_size, True)
@@ -100,7 +100,7 @@ validation_generator = generator(validation_samples, batch_size, False)
 inputs = Input(shape = (160, 320, 3))
 preprocess = Lambda(lambda x: x / 255.0 - 0.5)(inputs)
 
-crop = Cropping2D(cropping=((70,25), (0,0)))(preprocess)
+crop = Cropping2D(cropping=((50,20), (0,0)))(preprocess)
 
 conv1 = Conv2D(12, (5, 5))(crop)
 conv1 = BatchNormalization()(conv1)
@@ -131,6 +131,6 @@ model = Model(inputs = inputs, outputs = prediction)
 
 model.compile(loss = 'mse', optimizer = 'adam')
 model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
-    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=10)
+    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=20)
 model.save('model_track2.h5')
 model.summary()
