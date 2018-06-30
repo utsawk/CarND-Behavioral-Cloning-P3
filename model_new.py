@@ -63,13 +63,13 @@ def generator(samples, batch_size, training):
             images = []
             measurements = []
             for sample in batch_samples:
-		for index in range(3):
+                for index in range(3):
                     source_path = sample[index]
                     filename = source_path.split('/')[-1]
                     current_path = 'data/IMG/' + filename
                     image = mpimg.imread(current_path)
                     measurement = float(sample[3]) + correction[index]
-		    # copy for processing later
+		            # copy for processing later
                     image_copy = np.copy(image)
                     measurement_copy = measurement
                     if training:
