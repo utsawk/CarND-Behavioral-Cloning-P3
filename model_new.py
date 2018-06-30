@@ -51,7 +51,7 @@ correction = [0, 0.25, -0.25]
 translate_range_hor = 100
 translate_range_ver = 20
 
-train_samples, validation_samples = train_test_split(lines[1:], test_size=0.2)
+train_samples, validation_samples = train_test_split(lines[1:8038], test_size=0.2)
 
 # add flipped image and the measurement for data augmentation with 1/2 probability
 def generator(samples, batch_size, training):
@@ -63,21 +63,27 @@ def generator(samples, batch_size, training):
             images = []
             measurements = []
             for sample in batch_samples:
-                index = np.random.randint(0, 3)
-                source_path = sample[index]
-                filename = source_path.split('/')[-1]
-                current_path = 'data/IMG/' + filename
-                image = mpimg.imread(current_path)
-                measurement = float(line[3]) + correction[index]
-                # add flipped image and the measurement for data augmentation
-                if np.random.randint(0, 2):
+		for index in range(3):
+                    source_path = sample[index]
+                    filename = source_path.split('/')[-1]
+                    current_path = 'data/IMG/' + filename
+                    image = mpimg.imread(current_path)
+                    measurement = float(sample[3]) + correction[index]
+		    # copy for processing later
+                    image_copy = np.copy(image)
+                    measurement_copy = measurement
+                    if training:
+                        image, measurement = perturb_image_helper(image, measurement)
+                    images.append(image)
+                    measurements.append(measurement)
+                    # add flipped image and the measurement for data augmentation
                     image = np.fliplr(image_copy)
                     measurement = -measurement_copy
-                if training:
-                    image, measurement = perturb_image_helper(image, measurement)
-                images.append(image)
-                measurements.append(measurement)
-                   
+                    if training:
+                        image, measurement = perturb_image_helper(image, measurement)
+                    images.append(image)
+                    measurements.append(measurement)
+       
             X = np.array(images)
             y = np.array(measurements)
             yield shuffle(X, y)
@@ -86,7 +92,7 @@ def generator(samples, batch_size, training):
 dropout_prob_cl = 0.25
 dropout_prob_fc = 0.5
 # batch size
-batch_size = 128
+batch_size = 16
 
 # compile and train the model using the generator function
 train_generator = generator(train_samples, batch_size, True)
@@ -125,7 +131,7 @@ prediction = Dense(1)(fc1)
 model = Model(inputs = inputs, outputs = prediction)
 
 model.compile(loss = 'mse', optimizer = 'adam')
-model.fit_generator(train_generator, steps_per_epoch= 6*len(train_samples)//batch_size, \
-    validation_data=validation_generator, validation_steps=6*len(validation_samples)//batch_size, nb_epoch=10)
+model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
+    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=10)
 model.save('model.h5')
 model.summary()
