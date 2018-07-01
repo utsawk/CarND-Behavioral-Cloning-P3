@@ -13,7 +13,9 @@ from keras.layers import Flatten, Dense, Lambda, Cropping2D, Activation, Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers.normalization import BatchNormalization
+# from keras.callbacks import ModelCheckpoint
 
+IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
 
 # image processing
 # image processing
@@ -35,8 +37,29 @@ def translate_image(image, angle, translate_range_hor, translate_range_ver):
     angle = angle + dx * 0.0025
     return image,angle
 
+def random_shadow(image):
+    """
+    Generates and adds random shadow
+    """
+    rand_width_scal_1 =  np.random.rand()
+    x1, y1 = IMAGE_WIDTH *  rand_width_scal_1, 0
+    rand_width_scal_2 =  np.random.rand()
+    x2, y2 = IMAGE_WIDTH * rand_width_scal_2, IMAGE_HEIGHT
+    xn, yn = np.mgrid[0:IMAGE_HEIGHT, 0:IMAGE_WIDTH]
+    mask = np.zeros_like(image[:, :, 1])
+    mask[(yn - y1) * (x2 - x1) - (y2 - y1) * (xn - x1) > 0] = 1
+
+    cond = mask == np.random.randint(2)
+    s_ratio = np.random.uniform(low=0.2, high=0.5)
+
+    hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    hls[:, :, 1][cond] = hls[:, :, 1][cond] * s_ratio
+    return cv2.cvtColor(hls, cv2.COLOR_HLS2RGB)
+
+
 def perturb_image_helper(image, angle):
     image = brightness_augment_image(image)
+    image = random_shadow(image)
     image, angle = translate_image(image, angle, translate_range_hor, translate_range_ver)
     return image,angle
 
@@ -51,7 +74,7 @@ correction = [0, 0.25, -0.25]
 translate_range_hor = 100
 translate_range_ver = 20
 
-train_samples, validation_samples = train_test_split(lines[1:8038], test_size=0.2)
+train_samples, validation_samples = train_test_split(lines[1:], test_size=0.2)
 
 # add flipped image and the measurement for data augmentation with 1/2 probability
 def generator(samples, batch_size, training):
@@ -69,17 +92,17 @@ def generator(samples, batch_size, training):
                     current_path = 'data/IMG/' + filename
                     image = mpimg.imread(current_path)
                     measurement = float(sample[3]) + correction[index]
-		            # copy for processing later
+                    # copy for processing later
                     image_copy = np.copy(image)
                     measurement_copy = measurement
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
                     # add flipped image and the measurement for data augmentation
                     image = np.fliplr(image_copy)
                     measurement = -measurement_copy
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
@@ -132,6 +155,6 @@ model = Model(inputs = inputs, outputs = prediction)
 
 model.compile(loss = 'mse', optimizer = 'adam')
 model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
-    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=10)
+    validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=15)
 model.save('model.h5')
 model.summary()
