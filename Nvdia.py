@@ -61,7 +61,7 @@ def add_salt_pepper_noise(image):
     Randomly add Salt and pepper noise
     """
     # Need to produce a copy as to not modify the original image
-    dice = random.randint(0, 100)
+    dice = np.random.randint(0, 100)
 
     if (dice < 30):
         row, col, _ = image.shape
