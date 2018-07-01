@@ -13,7 +13,9 @@ from keras.layers import Flatten, Dense, Lambda, Cropping2D, Activation, Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers.normalization import BatchNormalization
+# from keras.callbacks import ModelCheckpoint
 
+IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
 
 # image processing
 # image processing
@@ -35,8 +37,52 @@ def translate_image(image, angle, translate_range_hor, translate_range_ver):
     angle = angle + dx * 0.0025
     return image,angle
 
+def random_shadow(image):
+    """
+    Generates and adds random shadow
+    """
+    rand_width_scal_1 =  np.random.rand()
+    x1, y1 = IMAGE_WIDTH *  rand_width_scal_1, 0
+    rand_width_scal_2 =  np.random.rand()
+    x2, y2 = IMAGE_WIDTH * rand_width_scal_2, IMAGE_HEIGHT
+    xn, yn = np.mgrid[0:IMAGE_HEIGHT, 0:IMAGE_WIDTH]
+    mask = np.zeros_like(image[:, :, 1])
+    mask[(yn - y1) * (x2 - x1) - (y2 - y1) * (xn - x1) > 0] = 1
+
+    cond = mask == np.random.randint(2)
+    s_ratio = np.random.uniform(low=0.2, high=0.5)
+
+    hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    hls[:, :, 1][cond] = hls[:, :, 1][cond] * s_ratio
+    return cv2.cvtColor(hls, cv2.COLOR_HLS2RGB)
+
+def add_salt_pepper_noise(image):
+    """
+    Randomly add Salt and pepper noise
+    """
+    # Need to produce a copy as to not modify the original image
+    dice = random.randint(0, 100)
+
+    if (dice < 30):
+        row, col, _ = image.shape
+        salt_vs_pepper = 0.20
+        amount = 0.030
+        num_salt = np.ceil(amount * image.size * salt_vs_pepper)
+        num_pepper = np.ceil(amount * image.size * (1.0 - salt_vs_pepper))
+
+        # Add Salt noise
+        coords = [np.random.randint(0, i - 1, int(num_salt)) for i in image.shape]
+        image[coords[0], coords[1], :] = 255
+
+        # Add Pepper noise
+        coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in image.shape]
+        image[coords[0], coords[1], :] = 0
+    return image
+
 def perturb_image_helper(image, angle):
     image = brightness_augment_image(image)
+    image = add_salt_pepper_noise(image)
+    image = random_shadow(image)
     image, angle = translate_image(image, angle, translate_range_hor, translate_range_ver)
     return image,angle
 
@@ -72,14 +118,14 @@ def generator(samples, batch_size, training):
                     # copy for processing later
                     image_copy = np.copy(image)
                     measurement_copy = measurement
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
                     # add flipped image and the measurement for data augmentation
                     image = np.fliplr(image_copy)
                     measurement = -measurement_copy
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
@@ -140,9 +186,9 @@ model = Model(inputs = inputs, outputs = prediction)
 
 model.compile(loss = 'mse', optimizer = 'adam')
 
-checkpoint = ModelCheckpoint('checkpoints/model-{epoch:03d}.h5', monitor='val_loss', verbose=0, save_best_only=False, mode='auto')
+# checkpoint = ModelCheckpoint('checkpoints/model-{epoch:03d}.h5', monitor='val_loss', verbose=0, save_best_only=False, mode='auto')
 
 model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
     validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=10)
-model.save('model_track2.h5')
+model.save('model.h5')
 model.summary()
