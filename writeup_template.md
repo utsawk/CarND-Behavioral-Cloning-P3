@@ -10,7 +10,7 @@
 
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
+* Build a convolution neural network in Keras that predicts steering angles from images
 * Train and validate the model with a training and validation set
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
@@ -18,45 +18,69 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
+[image1]: ./writeup_images/hist_given.png "histogram of steering angles"
+[image2]: ./writeup_images/hist_all_images.png "histogram of all"
+[image3]: ./writeup_images/hist_aug.png "histogram of augmented dataset"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
-
----
-### Files Submitted & Code Quality
-
-#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
+### Files
 
 My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
+* exploratory_data_analysis.ipynb (Jupyter notebook) containing of data given by Udacity & how enhancements on it can help with training
+* model.py containing the script to create and train a neural network based on Nvdia paper [1]
+* SermaNet.py containing the script to create and train a neural network based on SermaNet [2]
+* drive.py for driving the car in autonomous mode (speed increased to 12mph for faster driving)
+* video.py for creating video of pics taken during autonomous mode
 * model.h5 containing a trained convolution neural network 
 * writeup_report.md or writeup_report.pdf summarizing the results
+* track1 containing the video of driving around track 1
+* track2 containing the video of driving around track 2
+* track3 containing the video of driving around the mountain track in old simulator
 
-#### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
+### Data
+
+The data can be downloaded from [here](https://www.dropbox.com/s/6nh03a8mm142zgz/data.zip). It contains the training data provided by Udacity on track 1 and a couple of runs from track 2 (driving manually on track 2 while exhibiting good driving behaviour is a challenge too, but the data is good enough to keep the car on the road).
+
+
+#### Using the trained model to run the simulator
+Using the Udacity provided simulator and drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
 ```
 
-#### 3. Submission code is usable and readable
+### Data Analysis
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+I started by using the Udacity provided data and only center images. I implemented the LeNet architecture, but did not try tuning it too much when it did not work. Next, I used the exact model I trained for the [Traffic Sign Classifier project](https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project) [2] and immediately saw improvement. However, it still did not complete the track. Plotting the histogram of the steering angles shows that the given data is biased and and ~0 steering angles dominate. A model trained on this dataset would have a tendency of predicting ~0 steering angles. Also, because the track has more left turns, negative angles are better represented than positive angles.
 
-### Model Architecture and Training Strategy
+![alt text][image1]
 
-#### 1. An appropriate model architecture has been employed
+As recommended, I decided to include the left and right images and add 0.25 and -0.25 corrections (in radians) respectively. Additionally, I flipped the images and the corresponding steering angles and added them to the dataset. The histogram of the new dataset is shown below. Using this and the SemraNet architecture was good enough to drive around track 1 without touching any of the lane lines. However, the car was veering from side to side every now and then and not driving as smoothly. 
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+![alt text][image2]
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+From the histogram, it can be seen that the model tends to learn the three steering angles - -0.25, 0 and 0.25 and is probably the reason the car veers from side to side sometimes. To fix it, I added horizontal translations to balance the dataset. Note that I also consider other image augmentation techniques (more on this in the next section) for generalization, but these don't affect the steering angles and are thus not considered for plotting the histogram here. The resulting histogram shown below has a nice Gaussian look to it and car seems to drive better as well.
+
+![alt text][image3]
+
+I had achieved the required performance easily on track 1 (within a couple of days) and tried using the same architecture and image augmentation on track 1 images to train the model to drive on track 2. 
+
+### Image augmentation
+I considered the following image augmentation techniques:
+1. Horizontal translation: As mentioned earlier, this was done to create the effect of different views and alter steering angles accordingly. The translation was drawn uniformly at random from [-50, 50] and applied to the image. I used 0.0025 radians angle per pixel of translation and it seemed to work well. I did not experiment much with this value.
+2. Vertical translation: I also added vertical translation to create the effect of slopes - uphill and downhill. The translation was drawn uniformly at random from [-20, 20] and applied to the image. I did not try higher values for this. This does not affect the steering angle.  
+3. Brighness augmentation: The brightness is scaled uniformly at random from [50, 150]. The track 2 for the project is a little darker and changing brightness would help the neural network to learn better. 
+4. Random shadow: 
+
+### Neural Network Architecture
+
+
+
+
+#### An appropriate model architecture has been employed
+ 
 
 #### 2. Attempts to reduce overfitting in the model
 
