@@ -36,10 +36,6 @@ My project includes the following files:
 * track2 containing the video of driving around track 2
 * track3 containing the video of driving around the mountain track in old simulator
 
-### Data
-
-The data can be downloaded from [here](https://www.dropbox.com/s/6nh03a8mm142zgz/data.zip). It contains the training data provided by Udacity on track 1 and a couple of runs from track 2 (driving manually on track 2 while exhibiting good driving behaviour is a challenge too, but the data is good enough to keep the car on the road).
-
 
 ### Using the trained model to run the simulator
 Using the Udacity provided simulator and drive.py file, the car can be driven autonomously around the track by executing 
@@ -47,7 +43,7 @@ Using the Udacity provided simulator and drive.py file, the car can be driven au
 python drive.py model.h5
 ```
 
-### Data Analysis Of Given Data
+## Data Analysis Of Given Data
 
 I started by using the Udacity provided data and only center images. I implemented the LeNet architecture, but did not try tuning it too much when it did not work. Next, I used the exact model I trained for the [Traffic Sign Classifier project](https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project) [2] and immediately saw improvement. However, it still did not complete the track. Plotting the histogram of the steering angles shows that the given data is biased and ~0 steering angles dominate. A model trained on this dataset would have a tendency of predicting ~0 steering angles. Also, because the track has more left turns, negative angles are better represented than positive angles.
 
@@ -63,6 +59,10 @@ From the histogram, it can be seen that the model may tend to learn three steeri
 
 I had achieved the required performance easily on track 1 (within a couple of days) and tried using the same architecture and image augmentation on track 1 images to train the model to drive on track 2. 
 
+## Solution Overview
+The block diagram for the training process is shown in figure below. Images are fed into the CNN that computes the steering angle. The predicted steering angle is compared to the measured steering angles and the weights of the CNN are adjusted to decrease the mean squared error. 
+
+
 ### Image augmentation
 
 I considered the following image augmentation techniques:
@@ -72,9 +72,6 @@ I considered the following image augmentation techniques:
 4. Random shadow: Almost a week of training was based on the above mentioned image augmentation techniques and SermaNet architecture. However I could not modify it to work on track 2. Then I decided to switch architecture to the Nvdia architecture because it seems suited to the problem. Also, I realized that brightness adjustment uniformly scales the pixels and random shadowing would be a good way to simulate shadows and generalize the model. Inspired by [3], I added random shadow to the images.
 
 Note that all the above image augmentation techniques are applied using the *perturb_image_helper(image, angle)* function in my submission.
-
-## Solution Overview
-The block diagram for the training process is shown in figure below. Images are fed into the CNN that computes the steering angle. The predicted steering angle is compared to the measured steering angles and the weights of the CNN are adjusted to decrease the mean squared error. 
 
 ### Neural Network Architecture
 
@@ -132,6 +129,11 @@ The overall achitecture is presented in the figure below.
 ### Training data
 
 As mentioned above, Udacity provided data (all center, right and left images) was enough to train the models to drive on track 1. With both the architectures and image augmentations mentioned above, I could not get the car to drive on track 2. I really wanted to make it work without collecting additional data, but I gave up eventually. Then I collected data by driving 2 laps on track 2. Driving on track 2 was challenging for me as well and I could not drive in one lane. Even after this, both the architectures were failing at a sharp left turn (almost a U-turn). I decided to collect data driving and putting the car in the exact same situation. Adding this to the training data helped the car navigate the tricky spot and it was able to complete the track autonomously (only the Nvdia architecture). 
+
+For every run, the data is shuffled and randomly split into two data sets - 80% is used for training and 20% is used for validation.
+
+The data used for the project can be downloaded from [here](https://www.dropbox.com/s/6nh03a8mm142zgz/data.zip). It contains the training data provided by Udacity on track 1 and a couple of runs from track 2 (driving manually on track 2 while exhibiting good driving behaviour is a challenge too, but the data is good enough to keep the car on the road).
+
 
 ### Model Architecture and Training Strategy
 
