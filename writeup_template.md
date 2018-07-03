@@ -83,31 +83,57 @@ I used the Nvdia architecture for the final submission, that has 5 convolution l
 
 
 |Layer (type)           |      Output Shape         |     Param #       |
+
 |:---------------------:|:---------------------------------------------:| 
+
 | input_1 (InputLayer)   |      (None, 160, 320, 3)   |    0         |
+
 | lambda_1 (Lambda)       |     (None, 160, 320, 3)   |    0         |
+
 | cropping2d_1 (Cropping2D)  |  (None, 90, 320, 3)    |    0         |
+
 | conv2d_1 (Conv2D)        |    (None, 43, 158, 24)   |    1824      |
+
 | batch_normalization_1    |    (None, 43, 158, 24)   |    96        |
+
 | conv2d_2 (Conv2D)        |    (None, 20, 77, 36)    |    21636     |
+
 | batch_normalization_2    |    (None, 20, 77, 36)    |    144       |
+
 | conv2d_3 (Conv2D)        |    (None, 8, 37, 48)     |    43248     |
+
 | batch_normalization_3    |    (None, 8, 37, 48)     |    192       |
+
 | conv2d_4 (Conv2D)        |    (None, 6, 35, 64)     |    27712     |
+
 | batch_normalization_4    |    (None, 6, 35, 64)     |    256       |
+
 | conv2d_5 (Conv2D)        |    (None, 4, 33, 64)     |    36928     |
+
 | batch_normalization_5    |    (None, 4, 33, 64)     |    256       |
+
 | flatten_1 (Flatten)      |    (None, 8448)          |    0         |
+
 | dense_1 (Dense)          |    (None, 1164)          |    9834636   |
+
 | dropout_1 (Dropout)      |    (None, 1164)          |    0         |
+
 | batch_normalization_6    |    (None, 1164)          |    4656      |
+
 | dense_2 (Dense)          |    (None, 100)           |    116500    |
+
 | dropout_2 (Dropout)      |    (None, 100)           |    0         |
+
 | batch_normalization_7    |    (None, 100)           |    400       |
+
 | dense_3 (Dense)          |    (None, 50)            |    5050      |
+
 | dropout_3 (Dropout)      |    (None, 50)            |    0         |
+
 | batch_normalization_8    |    (None, 50)            |    200       |
+
 | dense_4 (Dense)          |    (None, 10)            |    510       |
+
 | dense_5 (Dense)          |    (None, 1)             |    11        |
 
 
