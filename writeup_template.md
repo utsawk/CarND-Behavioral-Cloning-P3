@@ -1,12 +1,8 @@
 # **Behavioral Cloning** 
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
-**Behavioral Cloning Project**
+### Goals
 
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
@@ -21,7 +17,7 @@ The goals / steps of this project are the following:
 [image1]: ./writeup_images/hist_given.png "histogram of steering angles"
 [image2]: ./writeup_images/hist_all_images.png "histogram of all"
 [image3]: ./writeup_images/hist_aug.png "histogram of augmented dataset"
-[image4]: ./writeup_images/Nvdia_arch.jpg "SermaNet arch"
+[image4]: ./writeup_images/Nvdia_arch.jpg "Nvdia arch"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
@@ -86,6 +82,7 @@ I used two architectures for training - SermaNet (implementation in SermaNet.py)
 I used the Nvdia architecture for the final submission, that has 5 convolution layers and 5 fully connected layers, with the last layer representing the vehicle steering angle as output. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer [5]. I used the Adam optimizer and did not need to tune the learning rate throughout the project. To prevent overfitting in the Nvdia model, I used dropout with 0.5 (keep/dropout) probability for the funny connected layers.
 
 =================================================================
+
 Layer (type)                 Output Shape              Param #   
 
 =================================================================
