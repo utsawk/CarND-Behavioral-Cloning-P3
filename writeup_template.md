@@ -83,7 +83,7 @@ I used the Nvdia architecture for the final submission, that has 5 convolution l
 
 
 |Layer (type)           |      Output Shape         |     Param #       |
-|:---------------------:|:---------------------------------------------:| 
+|:---------------------:|:-------------------------- :|:-------------------:| 
 | input_1 (InputLayer)   |      (None, 160, 320, 3)   |    0         |
 | lambda_1 (Lambda)       |     (None, 160, 320, 3)   |    0         |
 | cropping2d_1 (Cropping2D)  |  (None, 90, 320, 3)    |    0         |
