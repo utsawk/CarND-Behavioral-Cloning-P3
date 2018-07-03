@@ -21,7 +21,7 @@ The goals / steps of this project are the following:
 [image1]: ./writeup_images/hist_given.png "histogram of steering angles"
 [image2]: ./writeup_images/hist_all_images.png "histogram of all"
 [image3]: ./writeup_images/hist_aug.png "histogram of augmented dataset"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
+[image4]: ./writeup_images/Nvdia_arch.jpg "SermaNet arch"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
@@ -29,13 +29,13 @@ The goals / steps of this project are the following:
 ### Files
 
 My project includes the following files:
-* exploratory_data_analysis.ipynb (Jupyter notebook) containing of data given by Udacity & how enhancements on it can help with training
+* exploratory_data_analysis.ipynb (Jupyter notebook) containing analysis of data given by Udacity & how enhancements on it can help with training
 * model.py containing the script to create and train a neural network based on Nvdia paper [1]
 * SermaNet.py containing the script to create and train a neural network based on SermaNet [2]
 * drive.py for driving the car in autonomous mode (speed increased to 12mph for faster driving)
 * video.py for creating video of pics taken during autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* writeup_report.md summarizing the results
 * track1 containing the video of driving around track 1
 * track2 containing the video of driving around track 2
 * track3 containing the video of driving around the mountain track in old simulator
@@ -45,7 +45,7 @@ My project includes the following files:
 The data can be downloaded from [here](https://www.dropbox.com/s/6nh03a8mm142zgz/data.zip). It contains the training data provided by Udacity on track 1 and a couple of runs from track 2 (driving manually on track 2 while exhibiting good driving behaviour is a challenge too, but the data is good enough to keep the car on the road).
 
 
-#### Using the trained model to run the simulator
+### Using the trained model to run the simulator
 Using the Udacity provided simulator and drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
@@ -61,42 +61,148 @@ As recommended, I decided to include the left and right images and add 0.25 and 
 
 ![alt text][image2]
 
-From the histogram, it can be seen that the model tends to learn the three steering angles - -0.25, 0 and 0.25 and is probably the reason the car veers from side to side sometimes. To fix it, I added horizontal translations to balance the dataset. Note that I also consider other image augmentation techniques (more on this in the next section) for generalization, but these don't affect the steering angles and are thus not considered for plotting the histogram here. The resulting histogram shown below has a nice Gaussian look to it and car seems to drive better as well.
+From the histogram, it can be seen that the model may tend to learn three steering angles - -0.25, 0 and 0.25 and is probably the reason the car veers from side to side sometimes. To fix it, I added horizontal translations to balance the dataset. Note that I also consider other image augmentation techniques (more on this in the next section) for generalization, but these don't affect the steering angles and are thus not considered for plotting the histogram here. The resulting histogram shown below has a nice Gaussian look to it and car seems to drive better as well.
 
 ![alt text][image3]
 
 I had achieved the required performance easily on track 1 (within a couple of days) and tried using the same architecture and image augmentation on track 1 images to train the model to drive on track 2. 
 
 ### Image augmentation
+
 I considered the following image augmentation techniques:
 1. Horizontal translation: As mentioned earlier, this was done to create the effect of different views and alter steering angles accordingly. The translation was drawn uniformly at random from [-50, 50] and applied to the image. I used 0.0025 radians angle per pixel of translation and it seemed to work well. I did not experiment much with this value.
 2. Vertical translation: I also added vertical translation to create the effect of slopes - uphill and downhill. The translation was drawn uniformly at random from [-20, 20] and applied to the image. I did not try higher values for this. This does not affect the steering angle.  
-3. Brighness augmentation: The brightness is scaled uniformly at random from [50, 150]. The track 2 for the project is a little darker and changing brightness would help the neural network to learn better. 
-4. Random shadow: 
+3. Brighness augmentation: The brightness is scaled uniformly at random from [0.5, 1.5]. The track 2 for the project is a little darker and changing brightness would help the neural network to learn better. 
+4. Random shadow: Almost a week of training was based on the above mentioned image augmentation techniques and SermaNet architecture. However I could not modify it to work on track 2. Then I decided to switch architecture to the Nvdia architecture because it seems suited to the problem. Also, I realized that brightness adjustment uniformly scales the pixels and random shadowing would be a good way to simulate shadows and generalize the model. Inspired by [3], I added random shadow to the images.
+
+Note that all the above image augmentation techniques are applied using the *perturb_image_helper(image, angle)* function in my submission. This function is applied to training images with a probability of 0.5. 
 
 ### Neural Network Architecture
 
+I used two architectures for training - SermaNet (implementation in SermaNet.py) and Nvdia (implementation in model.py). The former along with image augmentation techniques is good enough to drive on track 1. The SermaNet architecture is same as used in [4] (see writeup) with dropout probabilities of 0.25 and 0.5 for convolutional and fully connected layers respectively. However, I could not get it to work on track 2. Then I switched to the Nvdia architecture. Only the Nvdia architecture is presented below for brevity. 
+
+#### Nvdia architecture
+
+I used the Nvdia architecture for the final submission, that has 5 convolution layers and 5 fully connected layers, with the last layer representing the vehicle steering angle as output. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer [5]. I used the Adam optimizer and did not need to tune the learning rate throughout the project. To prevent overfitting in the Nvdia model, I used dropout with 0.5 (keep/dropout) probability for the funny connected layers.
+
+=================================================================
+Layer (type)                 Output Shape              Param #   
+
+=================================================================
+
+input_1 (InputLayer)         (None, 160, 320, 3)       0         
+
+_________________________________________________________________
+
+lambda_1 (Lambda)            (None, 160, 320, 3)       0         
+
+_________________________________________________________________
+
+cropping2d_1 (Cropping2D)    (None, 90, 320, 3)        0         
+
+_________________________________________________________________
+
+conv2d_1 (Conv2D)            (None, 43, 158, 24)       1824      
+
+_________________________________________________________________
+
+batch_normalization_1        (None, 43, 158, 24)       96        
+
+_________________________________________________________________
+
+conv2d_2 (Conv2D)            (None, 20, 77, 36)        21636     
+
+_________________________________________________________________
+
+batch_normalization_2        (None, 20, 77, 36)        144       
+
+_________________________________________________________________
+
+conv2d_3 (Conv2D)            (None, 8, 37, 48)         43248     
+
+_________________________________________________________________
+
+batch_normalization_3        (None, 8, 37, 48)         192       
+
+_________________________________________________________________
+
+conv2d_4 (Conv2D)            (None, 6, 35, 64)         27712     
+
+_________________________________________________________________
+
+batch_normalization_4        (None, 6, 35, 64)         256       
+
+_________________________________________________________________
+
+conv2d_5 (Conv2D)            (None, 4, 33, 64)         36928     
+
+_________________________________________________________________
+
+batch_normalization_5        (None, 4, 33, 64)         256       
+
+_________________________________________________________________
+
+flatten_1 (Flatten)          (None, 8448)              0         
+
+_________________________________________________________________
+
+dense_1 (Dense)              (None, 1164)              9834636   
+
+_________________________________________________________________
+
+dropout_1 (Dropout)          (None, 1164)              0         
+
+_________________________________________________________________
+
+batch_normalization_6        (None, 1164)              4656      
+
+_________________________________________________________________
+
+dense_2 (Dense)              (None, 100)               116500    
+
+_________________________________________________________________
+
+dropout_2 (Dropout)          (None, 100)               0         
+
+_________________________________________________________________
+
+batch_normalization_7        (None, 100)               400       
+
+_________________________________________________________________
+
+dense_3 (Dense)              (None, 50)                5050      
+
+_________________________________________________________________
+
+dropout_3 (Dropout)          (None, 50)                0         
+
+_________________________________________________________________
+
+batch_normalization_8        (None, 50)                200       
+
+_________________________________________________________________
+
+dense_4 (Dense)              (None, 10)                510       
+
+_________________________________________________________________
+
+dense_5 (Dense)              (None, 1)                 11        
+
+=================================================================
+
+Total params: 10,094,255
+
+Trainable params: 10,091,155
+
+Non-trainable params: 3,100
 
 
+The overall achitecture is presented in the figure below.
+![architecture][image4]
 
-#### An appropriate model architecture has been employed
- 
+### Training data
 
-#### 2. Attempts to reduce overfitting in the model
-
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-#### 3. Model parameter tuning
-
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
-
-#### 4. Appropriate training data
-
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
-
-For details about how I created the training data, see the next section. 
+As mentioned above, Udacity provided data (all center, right and left images) was enough to train the models to drive on track 1. With both the architectures and image augmentations mentioned above, I could not get the car to drive on track 2. I really wanted to make it work without collecting additional data, but I gave up eventually. Then I collected data by driving 2 laps on track 2. Driving on track 2 was challenging for me as well and I could not drive in one lane. Even after this, both the architectures were failing at a sharp left turn (almost a U-turn). I decided to collect data driving and putting the car in the exact same situation. Adding this to the training data helped the car navigate the tricky spot and it was able to complete the track autonomously (only the Nvdia architecture). 
 
 ### Model Architecture and Training Strategy
 
