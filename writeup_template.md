@@ -82,8 +82,8 @@ I used two architectures for training - SermaNet (implementation in SermaNet.py)
 I used the Nvdia architecture for the final submission, that has 5 convolution layers and 5 fully connected layers, with the last layer representing the vehicle steering angle as output. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer [5]. I used the Adam optimizer and did not need to tune the learning rate throughout the project. To prevent overfitting in the Nvdia model, I used dropout with 0.5 (keep/dropout) probability for the funny connected layers.
 
 
-|Layer (type)           |      Output Shape         |     Param #       |
-|:---------------------:|:-------------------------- :|:-------------------:| 
+| Layer (type)        		|     Output Shape	        					| Param # |
+|:---------------------:|:------------------------------------:|:--------: 
 | input_1 (InputLayer)   |      (None, 160, 320, 3)   |    0         |
 | lambda_1 (Lambda)       |     (None, 160, 320, 3)   |    0         |
 | cropping2d_1 (Cropping2D)  |  (None, 90, 320, 3)    |    0         |
