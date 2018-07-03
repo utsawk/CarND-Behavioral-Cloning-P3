@@ -49,7 +49,7 @@ python drive.py model.h5
 
 ### Data Analysis
 
-I started by using the Udacity provided data and only center images. I implemented the LeNet architecture, but did not try tuning it too much when it did not work. Next, I used the exact model I trained for the [Traffic Sign Classifier project](https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project) [2] and immediately saw improvement. However, it still did not complete the track. Plotting the histogram of the steering angles shows that the given data is biased and and ~0 steering angles dominate. A model trained on this dataset would have a tendency of predicting ~0 steering angles. Also, because the track has more left turns, negative angles are better represented than positive angles.
+I started by using the Udacity provided data and only center images. I implemented the LeNet architecture, but did not try tuning it too much when it did not work. Next, I used the exact model I trained for the [Traffic Sign Classifier project](https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project) [2] and immediately saw improvement. However, it still did not complete the track. Plotting the histogram of the steering angles shows that the given data is biased and ~0 steering angles dominate. A model trained on this dataset would have a tendency of predicting ~0 steering angles. Also, because the track has more left turns, negative angles are better represented than positive angles.
 
 ![alt text][image1]
 
@@ -81,111 +81,35 @@ I used two architectures for training - SermaNet (implementation in SermaNet.py)
 
 I used the Nvdia architecture for the final submission, that has 5 convolution layers and 5 fully connected layers, with the last layer representing the vehicle steering angle as output. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer [5]. I used the Adam optimizer and did not need to tune the learning rate throughout the project. To prevent overfitting in the Nvdia model, I used dropout with 0.5 (keep/dropout) probability for the funny connected layers.
 
-=================================================================
 
-Layer (type)                 Output Shape              Param #   
+|Layer (type)           |      Output Shape         |     Param #       |
+|:---------------------:|:---------------------------------------------:| 
+| input_1 (InputLayer)   |      (None, 160, 320, 3)   |    0         |
+| lambda_1 (Lambda)       |     (None, 160, 320, 3)   |    0         |
+| cropping2d_1 (Cropping2D)  |  (None, 90, 320, 3)    |    0         |
+| conv2d_1 (Conv2D)        |    (None, 43, 158, 24)   |    1824      |
+| batch_normalization_1    |    (None, 43, 158, 24)   |    96        |
+| conv2d_2 (Conv2D)        |    (None, 20, 77, 36)    |    21636     |
+| batch_normalization_2    |    (None, 20, 77, 36)    |    144       |
+| conv2d_3 (Conv2D)        |    (None, 8, 37, 48)     |    43248     |
+| batch_normalization_3    |    (None, 8, 37, 48)     |    192       |
+| conv2d_4 (Conv2D)        |    (None, 6, 35, 64)     |    27712     |
+| batch_normalization_4    |    (None, 6, 35, 64)     |    256       |
+| conv2d_5 (Conv2D)        |    (None, 4, 33, 64)     |    36928     |
+| batch_normalization_5    |    (None, 4, 33, 64)     |    256       |
+| flatten_1 (Flatten)      |    (None, 8448)          |    0         |
+| dense_1 (Dense)          |    (None, 1164)          |    9834636   |
+| dropout_1 (Dropout)      |    (None, 1164)          |    0         |
+| batch_normalization_6    |    (None, 1164)          |    4656      |
+| dense_2 (Dense)          |    (None, 100)           |    116500    |
+| dropout_2 (Dropout)      |    (None, 100)           |    0         |
+| batch_normalization_7    |    (None, 100)           |    400       |
+| dense_3 (Dense)          |    (None, 50)            |    5050      |
+| dropout_3 (Dropout)      |    (None, 50)            |    0         |
+| batch_normalization_8    |    (None, 50)            |    200       |
+| dense_4 (Dense)          |    (None, 10)            |    510       |
+| dense_5 (Dense)          |    (None, 1)             |    11        |
 
-=================================================================
-
-input_1 (InputLayer)         (None, 160, 320, 3)       0         
-
-_________________________________________________________________
-
-lambda_1 (Lambda)            (None, 160, 320, 3)       0         
-
-_________________________________________________________________
-
-cropping2d_1 (Cropping2D)    (None, 90, 320, 3)        0         
-
-_________________________________________________________________
-
-conv2d_1 (Conv2D)            (None, 43, 158, 24)       1824      
-
-_________________________________________________________________
-
-batch_normalization_1        (None, 43, 158, 24)       96        
-
-_________________________________________________________________
-
-conv2d_2 (Conv2D)            (None, 20, 77, 36)        21636     
-
-_________________________________________________________________
-
-batch_normalization_2        (None, 20, 77, 36)        144       
-
-_________________________________________________________________
-
-conv2d_3 (Conv2D)            (None, 8, 37, 48)         43248     
-
-_________________________________________________________________
-
-batch_normalization_3        (None, 8, 37, 48)         192       
-
-_________________________________________________________________
-
-conv2d_4 (Conv2D)            (None, 6, 35, 64)         27712     
-
-_________________________________________________________________
-
-batch_normalization_4        (None, 6, 35, 64)         256       
-
-_________________________________________________________________
-
-conv2d_5 (Conv2D)            (None, 4, 33, 64)         36928     
-
-_________________________________________________________________
-
-batch_normalization_5        (None, 4, 33, 64)         256       
-
-_________________________________________________________________
-
-flatten_1 (Flatten)          (None, 8448)              0         
-
-_________________________________________________________________
-
-dense_1 (Dense)              (None, 1164)              9834636   
-
-_________________________________________________________________
-
-dropout_1 (Dropout)          (None, 1164)              0         
-
-_________________________________________________________________
-
-batch_normalization_6        (None, 1164)              4656      
-
-_________________________________________________________________
-
-dense_2 (Dense)              (None, 100)               116500    
-
-_________________________________________________________________
-
-dropout_2 (Dropout)          (None, 100)               0         
-
-_________________________________________________________________
-
-batch_normalization_7        (None, 100)               400       
-
-_________________________________________________________________
-
-dense_3 (Dense)              (None, 50)                5050      
-
-_________________________________________________________________
-
-dropout_3 (Dropout)          (None, 50)                0         
-
-_________________________________________________________________
-
-batch_normalization_8        (None, 50)                200       
-
-_________________________________________________________________
-
-dense_4 (Dense)              (None, 10)                510       
-
-_________________________________________________________________
-
-dense_5 (Dense)              (None, 1)                 11        
-
-=================================================================
 
 Total params: 10,094,255
 
