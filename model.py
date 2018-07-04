@@ -26,7 +26,8 @@ translate_range_ver = 20
 
 def brightness_augment_image(image):
     """
-    Scales the brightness uniformly randomly 
+    Scales the brightness uniformly randomly
+    https://medium.freecodecamp.org/image-augmentation-make-it-rain-make-it-snow-how-to-modify-a-photo-with-machine-learning-163c0cb3843f 
     :param image: RGB image
     :return: RGB image randomly scaled brightness
     """
@@ -62,6 +63,7 @@ def translate_image(image, angle, translate_range_hor, translate_range_ver):
 def random_shadow(image):
     """
     Adds random shadow to image
+    https://medium.freecodecamp.org/image-augmentation-make-it-rain-make-it-snow-how-to-modify-a-photo-with-machine-learning-163c0cb3843f
     :param image: RGB image
     :return: RGB image with random shadow
     """
