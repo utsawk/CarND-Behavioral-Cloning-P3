@@ -143,7 +143,11 @@ The data used for the project can be downloaded from [here](https://www.dropbox.
 In this project, I learnt the lesson that there is no substitute for good labelled data. Image augmentation techniques are helpful to generalize the model, but it may not be possible to generalize it to the extent that it can provide a solution for all possible scenarios. Whenever possible, if collecting data is cheap (in this case it was), it is always recommended to do so.
 
 [1] http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf
+
 [2] http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
+
 [3] https://medium.freecodecamp.org/image-augmentation-make-it-rain-make-it-snow-how-to-modify-a-photo-with-machine-learning-163c0cb3843f
+
 [4] https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project
+
 [5] https://arxiv.org/abs/1502.03167
