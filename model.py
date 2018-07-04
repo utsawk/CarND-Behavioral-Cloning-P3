@@ -258,7 +258,7 @@ if __name__ == "__main__":
     # checkpoint = ModelCheckpoint('checkpoints/model-{epoch:03d}.h5', monitor='val_loss', verbose=0, save_best_only=False, mode='auto')
 
     model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
-        validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=1)
+        validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=15)
     model.save('model.h5')
     model.summary()
 
