@@ -28,7 +28,7 @@ My project includes the following files:
 * model.py containing the script to create and train a neural network based on SermaNet[1] and Nvdia paper [2] (default runs Nvdia, change run_model to 0 (line# 238) for SermaNet)
 * drive.py for driving the car in autonomous mode (speed increased to 12mph for faster driving)
 * video.py for creating video of pics taken during autonomous mode
-* model.h5 containing a trained convolution neural network 
+* model.h5 containing a trained convolution neural network (I could not get git lfs to work, so I have uploaded the model.h5 on dropbox link [here](https://www.dropbox.com/s/1zyafhi0nd7eq8j/model.h5?dl=0))
 * writeup.md/README.md summarizing the results
 * track1 containing the video of driving around track 1
 * track2 containing the video of driving around track 2
