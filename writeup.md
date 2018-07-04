@@ -19,7 +19,7 @@ The goals / steps of this project are the following:
 [image3]: ./writeup_images/hist_aug.png "histogram of augmented dataset"
 [image4]: ./writeup_images/Nvdia_arch.jpg "Nvdia arch"
 [image5]: ./writeup_images/block_diagram.jpg "block diagram"
-[image6]: ./writeup_images/image_aug.jpg "image augmentation"
+[image6]: ./writeup_images/image_aug.png "image augmentation"
 
 ### Files
 
@@ -30,9 +30,9 @@ My project includes the following files:
 * video.py for creating video of pics taken during autonomous mode
 * model.h5 containing a trained convolution neural network 
 * writeup.md/README.md summarizing the results
-* track1 containing the video of driving around track 1
-* track2 containing the video of driving around track 2
-* track3 containing the video of driving around the mountain track in old simulator
+* track1.mp4 containing the video of driving around track 1
+* track2.mp4 containing the video of driving around track 2
+* track3.mp4 containing the video of driving around the mountain track in old simulator
 
 
 ### Using the trained model to run the simulator
@@ -86,7 +86,7 @@ I used two architectures for training - SermaNet (implementation in lines# 139-1
 I used the Nvdia architecture for the final submission, that has 5 convolution layers and 5 fully connected layers, with the last layer representing the vehicle steering angle as output. The input to the model is a (160, 320, 3) image. The following are salient features of the model:
 1. I use a lambda layer for normalizing the data. I used the Udacity recommended normalization (divide by 255.0 and subtract 0.5).
 2. The top 50 pixels and bottom 20 pixels are cropped off to get rid of the surroundings (like trees, sky, etc.) and hood of the car respectively. 
-3. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer [5]. 
+3. I have observed faster convergence when using batch normalization [5], thus I use that in this project as well. Additionally, batch normalization allows the use of higher learning rates and also acts like a regularizer. 
 4. I used the Adam optimizer and did not need to tune the learning rate throughout the project. 
 5. To prevent overfitting in the Nvdia model, I used dropout with 0.5 (keep/dropout) probability for the fully connected layers.
 
@@ -140,4 +140,10 @@ The data used for the project can be downloaded from [here](https://www.dropbox.
 
 ### Conclusion
 
-In this project, I learnt the lesson that there is no substitute for good labelled data. Image augmentation techniques are helpful to generalize the model, but it may not be possible to generalize it to the extent that it can provide a solution for all possible scenarios. Whenever possible, if collecting data is cheap (in this case it was), it is always recommended to do so.
+In this project, I learnt the lesson that there is no substitute for good labelled data. Image augmentation techniques are helpful to generalize the model, but it may not be possible to generalize it to the extent that it can provide a solution for all possible scenarios. Whenever possible, if collecting data is cheap (in this case it was), it is always recommended to do so. I will try to generate good driving behaviour on the second track and train the CNN to drive just in the left lane -  I have been almost successful in this by using new data, but the car gets stuck towards the end. I will generate data for that particular turn and I am pretty confident it will work.
+
+[1] http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf
+[2] http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
+[3] https://medium.freecodecamp.org/image-augmentation-make-it-rain-make-it-snow-how-to-modify-a-photo-with-machine-learning-163c0cb3843f
+[4] https://github.com/utsawk/CarND-Traffic-Sign-Classifier-Project
+[5] https://arxiv.org/abs/1502.03167

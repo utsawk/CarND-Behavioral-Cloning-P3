@@ -119,14 +119,14 @@ def generator(samples, batch_size, training):
                     # copy for processing later
                     image_copy = np.copy(image)
                     measurement_copy = measurement
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
                     # add flipped image and the measurement for data augmentation
                     image = np.fliplr(image_copy)
                     measurement = -measurement_copy
-                    if training:
+                    if training and np.random.rand() > 0.5:
                         image, measurement = perturb_image_helper(image, measurement)
                     images.append(image)
                     measurements.append(measurement)
@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
     model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
         validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=1)
-    model.save('model_test.h5')
+    model.save('model.h5')
     model.summary()
 
 
