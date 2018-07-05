@@ -242,7 +242,7 @@ if __name__ == "__main__":
     run_model = 1 # choose 0 for SermaNet, 1 for Nvdia
 
     # dividing available data into training and validation sets
-    train_samples, validation_samples = train_test_split(lines[1:161], test_size=0.2)
+    train_samples, validation_samples = train_test_split(lines[1:], test_size=0.2)
 
     # batch size
     batch_size = 32
@@ -262,8 +262,8 @@ if __name__ == "__main__":
     # checkpoint = ModelCheckpoint('checkpoints/model-{epoch:03d}.h5', monitor='val_loss', verbose=0, save_best_only=False, mode='auto')
 
     model.fit_generator(train_generator, steps_per_epoch= len(train_samples)//batch_size, \
-        validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=1)
-    model.save('model1.h5')
+        validation_data=validation_generator, validation_steps=len(validation_samples)//batch_size, nb_epoch=15)
+    model.save('model.h5')
     model.summary()
     # plot_model(model, to_file='model.png')
 
